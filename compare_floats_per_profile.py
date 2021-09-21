@@ -20,7 +20,7 @@ floats = ['6904096', '6904098', '6904099', '6904100',
           '6904102', '6904103', '6904104', '6904105']
 # floats=['6904096','6904099','6904100',
 #         '6904103','6904104']
-profiles = ['_042']
+profiles = ['_045']
 rbr = floats[4:]
 sbe = floats[:4]
 locations = pd.DataFrame()
@@ -39,7 +39,7 @@ for i, fl in enumerate(floats):
         IFILE = file
         ds = xr.open_dataset(IFILE)
         df = ds.to_dataframe()
-        df = df.loc[0, 0, :, 0, 0]  # Choose only first profile
+        df = df.loc[0, 0, :, 0, 0].reset_index()  # Choose only first profile
         if file == 'R6904096_018.nc':
             print('Fehlerhafter File '+file)
             pres_profiles[int(file[10:12]), fl] = np.nan
@@ -52,9 +52,9 @@ for i, fl in enumerate(floats):
             temp_profiles[int(file[10:12]), fl] = np.nan
             psal_profiles[int(file[10:12]), fl] = np.nan
         else:
-            df.TEMP[df.TEMP_QC.astype('int') >= 2] = np.nan
-            df.PSAL[df.PSAL_QC.astype('int') >= 2] = np.nan
-            df.PRES[df.PRES_QC.astype('int') >= 2] = np.nan
+            df.loc[df.TEMP_QC.astype('int') >= 2,'TEMP'] = np.nan
+            df.loc[df.PSAL_QC.astype('int') >= 2,'PSAL'] = np.nan
+            df.loc[df.PRES_QC.astype('int') >= 2,'PRES'] = np.nan
             locations[fl] = [df.LATITUDE[0], df.LONGITUDE[0]]
             if (file[12] != 'D'):
                 locations['prof'] = int(file[10:12])
@@ -301,7 +301,7 @@ for i in profiles:
     plt.savefig('../../figures/Vortrag/floats_psal_temp_cycl'+str(i)+'.png')
 
 
-# %%
+# # %%
 # plt.figure(1, figsize=[20,10])
 # for i in range(1,8):
 #     plt.scatter(psal_profiles[i][rbr], temp_profiles[i][rbr],0.5, color='r')
@@ -313,9 +313,9 @@ for fl in floats:
     plt.text(loc['lon'][fl].iloc[-1], loc['lat'][fl].iloc[-1], fl)
 plt.scatter(loc['lon'][sbe].iloc[-1], loc['lat'][sbe].iloc[-1], color='b')
 plt.scatter(loc['lon'][rbr].iloc[-1], loc['lat'][rbr].iloc[-1], color='r')
-plt.title('IceDivA floats swarm last location')
+plt.title('IceDivA floats swarm last location, cycle '+profiles[0][1:])
 plt.tight_layout()
-# plt.savefig('../../figures/Vortrag/floats_lastloc.png')
+plt.savefig('../../figures/Vortrag/floats_lastloc.png')
 # %%
 
 plt.figure(3, figsize=[8, 5])
@@ -328,22 +328,26 @@ plt.scatter(loc['lon'].iloc[-1], loc['lat'].iloc[-1],
            )
 
 # plt.scatter(loc['lon'][rbr].iloc[-1], loc['lat'][rbr].iloc[-1], color='r')
-# plt.title('IceDivA floats swarm last location')
+plt.title('IceDivA floats swarm locationsalinity at 10m depth, profile '+profiles[0][1:])
 plt.colorbar()
 plt.tight_layout()
 
 # %% Test
-psal_ref_diff = pd.DataFrame()
-for fl in floats:
-    psal_ref_diff[fl] =((psal_profiles[pres_profiles.round()==6].dropna(how='all').mean()[42][fl]
-      ) - (data.so.sel(latitude=loc['lat'][fl].iloc[-1],
-                      longitude=loc['lon'][fl].iloc[-1],
-                      method='nearest').values))[0]
-    plt.text(loc['lon'][fl].iloc[-1], loc['lat'][fl].iloc[-1], fl)                 
+# IFILE='E:/CMEMS/global-analysis-forecast-phy-001-024_20210711_20210711.nc'
+# ds = xr.open_dataset(IFILE)
+# psal_ref_diff = pd.DataFrame()
+
+# for fl in floats:
+#     psal_ref_diff[fl] =((psal_profiles[pres_profiles.round()==6].dropna(how='all').mean()[42][fl]
+#       ) - (ds.so.sel(latitude=loc['lat'][fl].iloc[-1],
+#                       longitude=loc['lon'][fl].iloc[-1],
+#                       method='nearest').values))[0]
+#     plt.text(loc['lon'][fl].iloc[-1], loc['lat'][fl].iloc[-1], fl)                 
                       
-data.so[:,:,(data.latitude>=44) & (data.latitude<=46),
-        (data.longitude>=-25) &(data.longitude<=-19)
-        ].plot(levels=np.arange(35.5,36,0.1))
-plt.scatter(loc['lon'].iloc[-1], loc['lat'].iloc[-1],
-            c=psal_ref_diff.transpose(),cmap='bwr')
-plt.colorbar()
+# ds.so[:,:,(ds.latitude>=44) & (ds.latitude<=46),
+#         (ds.longitude>=-25) &(ds.longitude<=-19)
+#         ].plot(levels=np.arange(35.5,36,0.1))
+# plt.scatter(loc['lon'].iloc[-1], loc['lat'].iloc[-1],
+#             c=psal_ref_diff.transpose(),cmap='bwr', vmin=-0.1, vmax=0.1)
+# plt.colorbar()
+# # plt.savefig('../../figures/Vortrag/floats_forecast_diff.png')
