@@ -10,6 +10,7 @@ import numpy as np
 import os
 import xarray as xr
 
+HIHI
 
 # %% Float einlesen
 os.chdir('H:/SO280/Auslegung/Daten')
