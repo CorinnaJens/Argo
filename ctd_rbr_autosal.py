@@ -634,7 +634,6 @@ for prof in ['03', '05', '07', '09']:
                     str(prof)+'_autosal_diff.png')
 
     
-    
     plt.figure()
     plt.grid()
     plt.plot((ctd.conductivity-ctd.conductivity_autosal),-ctd.pressure,marker= '.')
@@ -643,7 +642,7 @@ for prof in ['03', '05', '07', '09']:
     plt.ylabel('pressure [dbar]')
     plt.axvline(0,color='k')
     plt.xlim([-0.013,0.013])
-    plt.title('Differenz cond mea - autosal prof'+prof)
+    plt.title('Differenz cond meas - autosal prof'+prof)
     plt.legend(['ctd','rbr'])
     plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
@@ -663,7 +662,6 @@ for prof in ['03', '05', '07', '09']:
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
                     str(prof)+'_autosal_cor_diff.png')
 
-    
     
     plt.figure()
     plt.grid()
