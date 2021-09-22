@@ -56,7 +56,7 @@ for prof in ['03', '05', '07', '09']:
                             'ox1', 'ox2', 'ox3',
                             'fluoro', 'altim', 'bottles', 'flag']
                      )
-    bl = pd.read_csv(IFILE_bl, skiprows=18,sep=';')
+    bl = pd.read_csv(IFILE_bl, skiprows=18, sep=';', encoding = "ISO-8859-1")
     
     autosal = pd.read_csv('H:/SO280/SO280_min.csv',skiprows=2, sep=';',
                           decimal=',',
@@ -121,7 +121,8 @@ for prof in ['03', '05', '07', '09']:
                        names=['0', '1', 'date', 'time', 'nan', 'lat', 'lon',
                               'depth', 'cond', 'temp', 'pres', 'temp2',
                               'disso2', 'correct', 'disso2_sat', 'sea_pres',
-                              'psal', 'sound', 'spec_cond', 'dens_anom'])
+                              'psal', 'sound', 'spec_cond', 'dens_anom'],
+                       encoding = "ISO-8859-1")
     # data.pres = data.pres-data.pres[0]
     print(' pressure an bord: ' + str(data.pres[16]))
     cali=pd.read_csv('H:/ARGO/Salzkorrektur_Reiner_Steinfeldt/cal_param_SO280_rbr.txt', sep='+', names=['offset', 'cond', 'pressure', 'temperature'])
@@ -620,16 +621,47 @@ for prof in ['03', '05', '07', '09']:
     
     plt.figure()
     plt.grid()
+    plt.plot((ctd.salinity2-ctd.autosal),-ctd.pressure,marker= '.')
+    plt.plot((data.psal-data.autosal),-data.pressure,marker= '.')
+    plt.xlabel('$\Delta$ PSU')
+    plt.ylabel('pressure [dbar]')
+    plt.axvline(0,color='k')
+    plt.xlim([-0.013,0.013])
+    plt.title('difference psal meas - autosal prof'+prof)
+    plt.legend(['ctd','rbr'])
+    plt.tight_layout()
+    plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
+                    str(prof)+'_autosal_diff.png')
+
+    
+    
+    plt.figure()
+    plt.grid()
+    plt.plot((ctd.conductivity-ctd.conductivity_autosal),-ctd.pressure,marker= '.')
+    plt.plot((data.cond-data.conductivity_autosal),-data.pressure,marker= '.')
+    plt.xlabel('$\Delta$ mS/cm')
+    plt.ylabel('pressure [dbar]')
+    plt.axvline(0,color='k')
+    plt.xlim([-0.013,0.013])
+    plt.title('Differenz cond mea - autosal prof'+prof)
+    plt.legend(['ctd','rbr'])
+    plt.tight_layout()
+    plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
+                str(prof)+'_autosal_cond_diff.png')
+    
+    plt.figure()
+    plt.grid()
     plt.plot((ctd.salinity_cor-ctd.autosal),-ctd.pressure,marker= '.')
     plt.plot((data.psal_cor-data.autosal),-data.pressure,marker= '.')
     plt.xlabel('$\Delta$ PSU')
     plt.ylabel('pressure [dbar]')
     plt.axvline(0,color='k')
     plt.xlim([-0.013,0.013])
-    plt.title('Differenz psal meas_cor - autosal prof'+prof)
+    plt.title('difference psal meas_cor - autosal prof'+prof)
     plt.legend(['ctd','rbr'])
+    plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
-                    str(prof)+'_autosal_diff.png')
+                    str(prof)+'_autosal_cor_diff.png')
 
     
     
@@ -643,8 +675,9 @@ for prof in ['03', '05', '07', '09']:
     plt.xlim([-0.013,0.013])
     plt.title('Differenz cond meas_cor - autosal prof'+prof)
     plt.legend(['ctd','rbr'])
+    plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
-                str(prof)+'_autosal_cond_diff.png')
+                str(prof)+'_autosal_cond_cor_diff.png')
 
     # plt.figure()
     # plt.grid()
