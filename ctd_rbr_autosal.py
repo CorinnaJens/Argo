@@ -245,7 +245,7 @@ for prof in ['03', '05', '07', '09']:
                   (data.index <= ctd[ctd.stufen == a].index[-1]),
                   data.columns.get_loc('stufen')] = a
         int_stufen.append(ctd.pressure.iloc[i:j].mean().round(0))
-        str_stufen.append(str(ctd.pressure.iloc[i:j].mean().round(0)))
+        str_stufen.append(str(ctd.pressure.iloc[i:j].mean().round(0).astype(int)))
         # print(a, i, j)
         a += 1
         
@@ -259,106 +259,120 @@ for prof in ['03', '05', '07', '09']:
     plt.title('stops prof'+ str(prof))
     plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/Stufen_prof'+prof+'.png')
+# %% Profil
+    plt.close('all')
+    plt.rcParams['font.size']=20
+    fig = plt.figure(1, figsize=[6,10])
+    plt.title('salinity prof'+prof)
+    plt.plot(ctd.salinity2, -ctd.pressure)
+    plt.plot(data[:-700].psal, -data[:-700].pres)
+    [plt.axhline(y=-x) for x in int_stufen]     
+    plt.xlabel('salinity [PSU]')
+    plt.ylabel('pressure [dbar]')
+    plt.legend(['ctd','rbr'])
+    plt.tight_layout()
+    plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
+                         str(prof)+'_profil.png')
  # %% figure je Stufe
     
-#     for st in reversed(ctd.stufen.dropna().unique()):
-#         plt.figure()
+    # for st in reversed(ctd.stufen.dropna().unique()):
+    #     plt.figure()
     
-#         fig, axes = plt.subplots(2,2,figsize=[15,8])
-#         fig.suptitle(str(ctd.pressure[ctd.stufen == st].mean().round(0))+' dbar prof'+prof)
-#         axes[0, 0].plot(ctd.pressure[ctd.stufen == st])
-#         axes[0, 0].plot(data[data.stufen == st].pres)
-#         axes[0, 0].grid()
-#         axes[0 ,0].set_ylabel('pressure[dbar]')
-#         plt.setp(axes[0, 0].get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     fig, axes = plt.subplots(2,2,figsize=[15,8])
+    #     fig.suptitle(str(ctd.pressure[ctd.stufen == st].mean().round(0))+' dbar prof'+prof)
+    #     axes[0, 0].plot(ctd.pressure[ctd.stufen == st])
+    #     axes[0, 0].plot(data[data.stufen == st].pres)
+    #     axes[0, 0].grid()
+    #     axes[0 ,0].set_ylabel('pressure[dbar]')
+    #     plt.setp(axes[0, 0].get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
     
-#         axes[0, 1].plot(ctd.temperature[ctd.stufen == st])
-#         axes[0, 1].plot(data[data.stufen == st].temp)
-#         axes[0, 1].grid()
-#         axes[0 ,1].set_ylabel('temperature[°C]')
-#         plt.setp(axes[0, 1].get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     axes[0, 1].plot(ctd.temperature[ctd.stufen == st])
+    #     axes[0, 1].plot(data[data.stufen == st].temp)
+    #     axes[0, 1].grid()
+    #     axes[0 ,1].set_ylabel('temperature[°C]')
+    #     plt.setp(axes[0, 1].get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
     
-#         axes[1, 0].plot(ctd.conductivity[ctd.stufen == st])
-#         axes[1, 0].plot(data[data.stufen == st].cond)
-#         axes[1, 0].grid()
-#         axes[1 ,0].set_ylabel('conductivity')
-#         plt.setp(axes[1, 0].get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     axes[1, 0].plot(ctd.conductivity[ctd.stufen == st])
+    #     axes[1, 0].plot(data[data.stufen == st].cond)
+    #     axes[1, 0].grid()
+    #     axes[1 ,0].set_ylabel('conductivity')
+    #     plt.setp(axes[1, 0].get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
     
-#         axes[1, 1].plot(ctd.salinity2[ctd.stufen == st])
-#         axes[1, 1].plot(data[data.stufen == st].psal_cor)
-#         axes[1, 1].plot(ctd.autosal[ctd.stufen == st], marker='*')
-#         axes[1, 1].grid()
-#         axes[1, 1].legend(['ctd', 'rbr_corrected', 'autosal'])
-#         plt.setp(axes[1, 1].get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         axes[1 ,1].set_ylabel('salinity [PSU]')
-#         plt.tight_layout()
+    #     axes[1, 1].plot(ctd.salinity2[ctd.stufen == st])
+    #     axes[1, 1].plot(data[data.stufen == st].psal_cor)
+    #     axes[1, 1].plot(ctd.autosal[ctd.stufen == st], marker='*')
+    #     axes[1, 1].grid()
+    #     axes[1, 1].legend(['ctd', 'rbr_corrected', 'autosal'])
+    #     plt.setp(axes[1, 1].get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     axes[1 ,1].set_ylabel('salinity [PSU]')
+    #     plt.tight_layout()
 #         plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
 #                     str(prof)+'_st'+str(int(st))+'.png')
     
 #     # %% mit profil
-#     for st in reversed(ctd.stufen.dropna().unique()):
-#         plt.close('all')
-#         fig = plt.figure(1, figsize=[15,8])
-#         fig.suptitle(str(ctd.pressure[ctd.stufen == st].mean().round(0))+' dbar prof'+prof)
-#         # set up subplot grid
-#         gridspec.GridSpec(2,3)
-#         plt.subplot2grid((2,3), (0,2), colspan=1, rowspan=2)
-#         plt.plot(ctd.salinity2, -ctd.pressure)
-#         plt.plot(data[:-700].psal, -data[:-700].pres)
-#         plt.plot(ctd[ctd.stufen == st].salinity2,
-#                   -ctd[ctd.stufen == st].pressure,
-#                   marker='.',
-#                   markersize=20,
-#                   linestyle='none')
-#         plt.xlabel('salinity [PSU]')
-#         plt.ylabel('pressure[dbar')
-#         plt.legend(['ctd','rbr'])
+    # for st in reversed(ctd.stufen.dropna().unique()):
+    #     plt.close('all')
+    #     fig = plt.figure(1, figsize=[15,8])
+    #     fig.suptitle(str(ctd.pressure[ctd.stufen == st].mean().round(0))+' dbar prof'+prof)
+    #     # set up subplot grid
+    #     gridspec.GridSpec(2,3)
+    #     plt.subplot2grid((2,3), (0,2), colspan=1, rowspan=2)
+    #     plt.plot(ctd.salinity2, -ctd.pressure)
+    #     plt.plot(data[:-700].psal, -data[:-700].pres)
+    #     plt.plot(ctd[ctd.stufen == st].salinity2,
+    #               -ctd[ctd.stufen == st].pressure,
+    #               marker='.',
+    #               markersize=20,
+    #               linestyle='none')
+    #     plt.xlabel('salinity [PSU]')
+    #     plt.ylabel('pressure[dbar')
+    #     plt.legend(['ctd','rbr'])
         
         
-#         plt.subplot2grid((2,3), (0,0))
-#         plt.plot(ctd.pressure[ctd.stufen == st])
-#         plt.plot(data[data.stufen == st].pres)
-#         plt.grid()
-#         plt.ylabel('pressure[dbar]')
-#         plt.setp(plt.gca().get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     plt.subplot2grid((2,3), (0,0))
+    #     plt.plot(ctd.pressure[ctd.stufen == st])
+    #     plt.plot(data[data.stufen == st].pres)
+    #     plt.grid()
+    #     plt.ylabel('pressure[dbar]')
+    #     plt.setp(plt.gca().get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
         
-#         plt.subplot2grid((2,3), (0,1))
-#         plt.plot(ctd.temperature[ctd.stufen == st])
-#         plt.plot(data[data.stufen == st].temp)
-#         plt.grid()
-#         plt.ylabel('temperature[°C]')
-#         plt.setp(plt.gca().get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     plt.subplot2grid((2,3), (0,1))
+    #     plt.plot(ctd.temperature[ctd.stufen == st])
+    #     plt.plot(data[data.stufen == st].temp)
+    #     plt.grid()
+    #     plt.ylabel('temperature[°C]')
+    #     plt.setp(plt.gca().get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
         
-#         plt.subplot2grid((2,3), (1,0))
-#         plt.plot(ctd.conductivity[ctd.stufen == st])
-#         plt.plot(data[data.stufen == st].cond)
-#         plt.grid()
-#         plt.ylabel('conductivity')
-#         plt.setp(plt.gca().get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.tight_layout()
+    #     plt.subplot2grid((2,3), (1,0))
+    #     plt.plot(ctd.conductivity[ctd.stufen == st])
+    #     plt.plot(data[data.stufen == st].cond)
+    #     plt.grid()
+    #     plt.ylabel('conductivity')
+    #     plt.setp(plt.gca().get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.tight_layout()
         
-#         plt.subplot2grid((2,3), (1,1))
-#         plt.plot(ctd.salinity2[ctd.stufen == st])
-#         plt.plot(data[data.stufen == st].psal_cor)
-#         plt.plot(ctd.autosal[ctd.stufen == st], marker='*')
-#         plt.grid()
-#         plt.legend(['ctd', 'rbr_corrected','autosal'])
-#         plt.setp(plt.gca().get_xticklabels(), rotation=30,
-#                   horizontalalignment='right')
-#         plt.ylabel('salinity [PSU]')
-#         plt.tight_layout()
+    #     plt.subplot2grid((2,3), (1,1))
+    #     plt.plot(ctd.salinity2[ctd.stufen == st])
+    #     plt.plot(data[data.stufen == st].psal_cor)
+    #     plt.plot(ctd.autosal[ctd.stufen == st], marker='*')
+    #     plt.grid()
+    #     plt.legend(['ctd', 'rbr_corrected','autosal'])
+    #     plt.setp(plt.gca().get_xticklabels(), rotation=30,
+    #               horizontalalignment='right')
+    #     plt.ylabel('salinity [PSU]')
+    #     plt.tight_layout()
 #         plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
 #                 str(prof)+'_st'+str(int(st))+'_mit_psal_profil.png')
 #     # %% figure je variable
@@ -532,48 +546,60 @@ for prof in ['03', '05', '07', '09']:
     
     # %% mean diff und std von diff
     plt.figure()
-    
-    fig, axes = plt.subplots(2,2,figsize=[15,8])
+    # plt.rcParams.update({'font.size': 20})
+    fig, axes = plt.subplots(2,2,figsize=[15,10])
     fig.suptitle('Mean diff + std of diff prof'+prof)
     
     data['pres_diff'] = (data.sea_pres - data.pressure)
     diff_des = data.groupby('stufen').pres_diff.describe()
     axes[0, 0].plot(ctd.stufen.dropna().unique(), diff_des['mean'], marker='.')
-    axes[0, 0].errorbar(ctd.stufen.dropna().unique(), diff_des['mean'], diff_des['std'])
+    axes[0, 0].errorbar(ctd.stufen.dropna().unique(),
+                        diff_des['mean'], diff_des['std'], linewidth=4)
     # plt.xticks(ctd.stufen.dropna().unique(), str_stufen, rotation=30)
     axes[0, 0].axhline(0, color='k')
+    axes[0, 0].grid()
     axes[0, 0].set_xlabel('pressure [dbar]')
     axes[0, 0].set_ylabel('pressure [$\Delta$dbar]')
+    axes[0, 0].tick_params(axis='x', labelrotation= 45)
     
     data['temp_diff'] = (data.temp - data.temperature)
     diff_des = data.groupby('stufen').temp_diff.describe()
-    axes[0, 1].plot(ctd.stufen.dropna().unique(), diff_des['mean'], marker='.')
-    axes[0, 1].errorbar(ctd.stufen.dropna().unique(), diff_des['mean'], diff_des['std'])
+    axes[0, 1].plot(ctd.stufen.dropna().unique(), diff_des['mean'], marker='.')     
+    axes[0, 1].errorbar(ctd.stufen.dropna().unique(),
+                        diff_des['mean'], diff_des['std'], linewidth=4)
     # plt.xticks(ctd.stufen.dropna().unique(), str_stufen, rotation=30)
     # plt.setp(axes,ctd.stufen.dropna().unique(), str_stufen, rotation=30)
     axes[0, 1].axhline(0, color='k')
+    axes[0, 1].grid()
     axes[0, 1].set_xlabel('pressure [dbar]')
     axes[0, 1].set_ylabel('temperature [$\Delta$°C]')
+    axes[0, 1].tick_params(axis='x', labelrotation= 45)
     
     data['cond_diff'] = (data.cond_cor - data.conductivity_cor)
     diff_des = data.groupby('stufen').cond_diff.describe()
     axes[1, 0].plot(ctd.stufen.dropna().unique(), diff_des['mean'], marker='.')
-    axes[1, 0].errorbar(ctd.stufen.dropna().unique(), diff_des['mean'], diff_des['std'])
+    axes[1, 0].errorbar(ctd.stufen.dropna().unique(),
+                        diff_des['mean'], diff_des['std'], linewidth=4)
     # plt.xticks(ctd.stufen.dropna().unique(), str_stufen, rotation=30)
     axes[1, 0].axhline(0, color='k')
+    axes[1, 0].grid()
     axes[1, 0].set_xlabel('pressure [dbar]')
     axes[1, 0].set_ylabel('conductivity [$\Delta$mS/cm]')
-    
+    axes[1, 0].tick_params(axis='x', labelrotation= 45)
     
     data['psal_diff'] = (data.psal_cor - data.salinity_cor)
     diff_des = data.groupby('stufen').psal_diff.describe()
     axes[1, 1].plot(ctd.stufen.dropna().unique(), diff_des['mean'], marker='.')
-    axes[1, 1].errorbar(ctd.stufen.dropna().unique(), diff_des['mean'], diff_des['std'])
+    axes[1, 1].errorbar(ctd.stufen.dropna().unique(),
+                        diff_des['mean'], diff_des['std'], linewidth=4)
     # plt.xticks(ctd.stufen.dropna().unique(), str_stufen, rotation=30)
     axes[1, 1].axhline(0, color='k')
+    axes[1, 1].grid()
     axes[1, 1].set_xlabel('pressure [dbar]')
     axes[1, 1].set_ylabel('salinity [$\Delta$PSU]')
+    axes[1, 1].tick_params(axis='x', labelrotation= 45)
     plt.setp(axes, xticks=ctd.stufen.dropna().unique(), xticklabels=str_stufen)
+    plt.rcParams['font.size']=20
     plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+
                     str(prof)+'_diff_std.png')
@@ -618,6 +644,7 @@ for prof in ['03', '05', '07', '09']:
     # plt.figure()
     # plt.plot(ctd.salinity2, -ctd.pressure)
     # plt.plot(ctd.autosal, -ctd.pressure, marker='*')
+    plt.rcParams['font.size']=11
     
     plt.figure()
     plt.grid()
@@ -671,7 +698,7 @@ for prof in ['03', '05', '07', '09']:
     plt.ylabel('pressure [dbar]')
     plt.axvline(0,color='k')
     plt.xlim([-0.013,0.013])
-    plt.title('Differenz cond meas_cor - autosal prof'+prof)
+    plt.title('difference cond meas_cor - autosal prof'+prof)
     plt.legend(['ctd','rbr'])
     plt.tight_layout()
     plt.savefig('H://SO280/Auslegung/figures/Stufen/RBR_CTD_prof'+

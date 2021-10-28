@@ -21,35 +21,22 @@ floats = ['6904096', '6904098', '6904099', '6904100',
           '6904102', '6904103', '6904104', '6904105']
 rbr = floats[4:]
 sbe = floats[:4]
-locations = pd.DataFrame()
+param = pd.DataFrame()
 
-temp_profiles = pd.DataFrame()
-pres_profiles = pd.DataFrame()
-psal_profiles = pd.DataFrame()
 loc = pd.DataFrame()
 for i, fl in enumerate(floats):
-    os.chdir('H:/SO280/Auslegung/Daten/'+fl)
+    os.chdir('H:/SO280/Auslegung/Daten/')
     lat =[]
     lon = []
-    for file in os.listdir():
-        IFILE = file
-        ds = xr.open_dataset(IFILE)
-        df = ds.to_dataframe()
-        df = df.loc[0, 0, :, 0, 0].reset_index()  # Choose only first profile
-        locations[fl]=[df.LATITUDE[0],df.LONGITUDE[0]]
-        if file[12] != 'D':
-            locations['prof']=int(file[10:12])
-            lon.append(df.LONGITUDE[0])
-            lat.append(df.LATITUDE[0])
-    if (fl == '6904097'):
-        lat.insert(18, np.nan)
-        lon.insert(18, np.nan)
-    # if (fl == '6904100'):
-    #     lat.insert(30, np.nan)
-    #     lon.insert(30, np.nan)
-    loc[('lat', fl)] = lat
-    loc[('lon', fl)] = lon
-loc.columns = pd.MultiIndex.from_tuples(loc.columns)
+    IFILE = fl+'_prof.nc'
+    ds = xr.open_dataset(IFILE)
+    df = ds.to_dataframe()
+    param['lat', fl] = ds.LATITUDE
+    param['lon', fl] = ds.LONGITUDE
+    param['psal', fl] = ds.PSAL.isel(N_LEVELS=1)
+    param['date',fl] = pd.DatetimeIndex(ds.JULD.values).strftime('%m%d')
+param.columns = pd.MultiIndex.from_tuples(param.columns)
+print('floats eingelesen')
 
 # %% CMEMs einlesen
 d_lon = -21  # deployment position
@@ -78,59 +65,97 @@ for i, date in enumerate(dates):
               (ds.longitude < -15) & (ds.longitude > -25)
            ].plot(levels=np.arange(-0.35, 0.35, 0.01)) #ssh
     fig, axes = plt.plot(d_lon, d_lat, 1, marker='+') #deployment position
-    plt.scatter(lon_bnds, lat_bnds, marker='*',
-                s=[50 for i in range(len(lon_bnds))]) #planned working areas
     plt.scatter([d_lon, d_lon+7/60, d_lon+7/60, d_lon-7/60, d_lon-7/60],
                 [d_lat, d_lat+7/60, d_lat-7/60, d_lat+7/60, d_lat-7/60, ],
-                1, marker='*', c='k')
+                1, marker='*', c='k', label='_Hidden label')
     plt.tight_layout()
     
-# %% Plot traj    
-    plt.plot(loc['lon'][:i],loc['lat'][:i])
-    plt.scatter(loc['lon'][:i],loc['lat'][:i])
-    # for i in range(0,len(loc)):
-    plt.scatter(loc['lon'][rbr].iloc[i],loc['lat'][rbr].iloc[i],color='r')
-    plt.scatter(loc['lon'][sbe].iloc[i],loc['lat'][sbe].iloc[i],color='b')
-    plt.legend(floats)
-    plt.tight_layout()
+
+   
     
+# Plot traj    
+    plt.plot(param.lon.where(param.date<=date),param.lat.where(param.date<=date),label=param.lat.columns)
+    # plt.legend(floats)
+    plt.scatter(param.lon.where(param.date<=date),
+                param.lat.where(param.date<=date),s=1)
+    
+    plt.scatter(param.lon.where(param.date==date),
+                param.lat.where(param.date==date),
+                c=param.psal.where(param.date==date).values,
+                s=50,vmin=35.5, vmax=35.85
+                , cmap='jet')
+    c = plt.colorbar()
+    c.set_label('salinity [PSU]')
+    plt.legend()
     plt.tight_layout()
-    plt.savefig('../../figures/floats_ssh'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
-    filenames.append('../../figures/floats_ssh'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
-# %%Plot SSH close
-    fig = plt.figure(2, figsize=[10, 5])
+    plt.savefig('H:/SO280/Auslegung/figures/floats_ssh'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+    filenames.append('H:/SO280/Auslegung/figures/floats_ssh'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+
+
+       # # %%Plot SSH close
+    plt.close('all')
+    fig = plt.figure(1, figsize=[10, 5])
     ds.adt[0, (ds.latitude > 43) & (ds.latitude < 47.5),
               (ds.longitude < -18.5) & (ds.longitude > -24.5)
-           ].plot(levels=np.arange(-0.35, 0.35, 0.01))
-    fig, axes = plt.plot(d_lon, d_lat, 1, marker='+')
-    # plt.scatter(lon_bnds, lat_bnds, marker='.',
-                # s=[50 for i in range(len(lon_bnds))])
+           ].plot(levels=np.arange(-0.35, 0.35, 0.01)) #ssh
+    fig, axes = plt.plot(d_lon, d_lat, 1, marker='+') #deployment position
     plt.scatter([d_lon, d_lon+7/60, d_lon+7/60, d_lon-7/60, d_lon-7/60],
                 [d_lat, d_lat+7/60, d_lat-7/60, d_lat+7/60, d_lat-7/60, ],
-                1, marker='*', c='k')
-    plt.tight_layout()
-        
-# %% Plot traj 2
-    plt.plot(loc['lon'][:i],loc['lat'][:i])
-    plt.scatter(loc['lon'][:i],loc['lat'][:i], color='orange')
-    # for i in range(0,len(loc)):
-    plt.scatter(loc['lon'][rbr].iloc[i],loc['lat'][rbr].iloc[i],color='r')
-    plt.scatter(loc['lon'][sbe].iloc[i],loc['lat'][sbe].iloc[i],color='b')
-    plt.legend(floats)
+                1, marker='*', c='k', label='_Hidden label')
     plt.tight_layout()
     
+    
+# Plot traj    
+    plt.plot(param.lon.where(param.date<=date),param.lat.where(param.date<=date),label=param.lat.columns)
+    # plt.legend(floats)
+    plt.scatter(param.lon.where(param.date<=date),
+                param.lat.where(param.date<=date),s=1)
+    
+    plt.scatter(param.lon.where(param.date==date),
+                param.lat.where(param.date==date),
+                c=param.psal.where(param.date==date).values,
+                s=50,vmin=35.5, vmax=35.85
+                , cmap='jet')
+    c = plt.colorbar()
+    c.set_label('salinity [PSU]')
+    plt.legend()
     plt.tight_layout()
-    plt.savefig('../../figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
-    filenames2.append('../../figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+    plt.savefig('H:/SO280/Auslegung/figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+    filenames2.append('H:/SO280/Auslegung/figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+
+#     fig = plt.figure(2, figsize=[10, 5])
+#     ds.adt[0, (ds.latitude > 43) & (ds.latitude < 47.5),
+#               (ds.longitude < -18.5) & (ds.longitude > -24.5)
+#            ].plot(levels=np.arange(-0.35, 0.35, 0.01))
+#     fig, axes = plt.plot(d_lon, d_lat, 1, marker='+')
+#     # plt.scatter(lon_bnds, lat_bnds, marker='.',
+#                 # s=[50 for i in range(len(lon_bnds))])
+#     plt.scatter([d_lon, d_lon+7/60, d_lon+7/60, d_lon-7/60, d_lon-7/60],
+#                 [d_lat, d_lat+7/60, d_lat-7/60, d_lat+7/60, d_lat-7/60, ],
+#                 1, marker='*', c='k')
+#     plt.tight_layout()
+        
+# # %% Plot traj 2
+#     plt.plot(loc['lon'][:i],loc['lat'][:i])
+#     plt.scatter(loc['lon'][:i],loc['lat'][:i], color='orange')
+#     # for i in range(0,len(loc)):
+#     plt.scatter(loc['lon'][rbr].iloc[i],loc['lat'][rbr].iloc[i],color='r')
+#     plt.scatter(loc['lon'][sbe].iloc[i],loc['lat'][sbe].iloc[i],color='b')
+#     plt.legend(floats)
+#     plt.tight_layout()
+    
+#     plt.tight_layout()
+#     plt.savefig('../../figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
+#     filenames2.append('../../figures/floats_ssh_closeup'+str(int(ds.time.dt.strftime('%Y%m%d')))+'.png')
 
 # %% Append to gif
-with imageio.get_writer('../../figures/mygif.gif', mode='I') as writer:
+with imageio.get_writer('H:/SO280/Auslegung/figures/mygif.gif', mode='I', fps=2) as writer:
     for filename in filenames:
         image = imageio.imread(filename)
         writer.append_data(image)
 print('gif erstellt')
 # %%
-with imageio.get_writer('../../figures/floats_ssh_closeup.gif', mode='I', fps=5) as writer:
+with imageio.get_writer('H:/SO280/Auslegung/figures/floats_ssh_closeup.gif', mode='I', fps=2) as writer:
     for filename in filenames2:
         image = imageio.imread(filename)
         writer.append_data(image)
